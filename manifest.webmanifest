@@ -2,7 +2,14 @@
  "name": "Treinador",
  "short_name": "Treinador",
  "display": "standalone",
- "background_color": "#0b1018",
- "theme_color": "#0b1018",
- "lang": "pt-BR"
+ "background_color": "#0b3d34",
+ "theme_color": "#0b3d34",
+ "lang": "pt-BR",
+ "icons": [
+  {
+   "src": "apple-touch-icon.png",
+   "sizes": "640x640",
+   "type": "image/png"
+  }
+ ]
 }
