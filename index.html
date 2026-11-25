@@ -232,6 +232,10 @@ details.mais[open] summary{margin-bottom:10px}
 .ag-bt .btn{min-height:52px;flex-direction:column;gap:0;padding:8px 6px;color:var(--agua);border-color:var(--agua-soft);background:var(--agua-soft);font-size:1rem}
 .ag-bt .btn small{font-size:.68rem;font-weight:600;color:var(--muted)}
 .ag-des{background:none;border:0;color:var(--muted);font-size:.8rem;font-weight:600;padding:10px 0 0;text-decoration:underline}
+.migra{display:flex;align-items:center;gap:var(--s3);text-decoration:none;color:var(--accent-ink);background:var(--accent);border:0}
+.migra b{display:block;font-size:.95rem}
+.migra span{display:block;font-size:.8rem;opacity:.85;margin-top:2px}
+.migra .ico{margin-left:auto;flex:none}
 .dica-p{font-size:.82rem;background:var(--prot-soft);border-radius:var(--r-s);padding:10px 12px}
 
 /* comer */
@@ -376,6 +380,7 @@ nav.tab .ico{width:23px;height:23px}
 
   <!-- HOJE -->
   <section id="v-hoje" class="view">
+    <a class="card migra" id="migra" hidden target="_top"><div><b>App novo: sem a faixa do Google e mais rápido</b><span>Toque aqui, depois Compartilhar → Adicionar à Tela de Início.</span></div><svg class="ico"><use href="#i-dir"/></svg></a>
     <div class="regua" id="regua"></div>
     <div id="alerta" class="alerta" hidden><svg class="ico"><use href="#i-alerta"/></svg><span></span></div>
 
@@ -962,6 +967,7 @@ function grafPeso(d,tend,plano,peso){
 }
 
 st.data=iso(new Date());
+if(!WEB&&TOKEN){var mg=$('migra');mg.href='https://carlosandrade-propec.github.io/treinador/#k='+encodeURIComponent(TOKEN);mg.hidden=false;}   // leva a chave do app antigo para o site
 if(WEB&&!TOKEN){document.body.innerHTML='<div style="font-family:system-ui;padding:32px 24px;max-width:420px;margin:auto"><h2>Treinador</h2><p>Abra pelo link completo (com a chave) uma vez neste aparelho. Depois ele lembra.</p></div>';}
 else { carrega(); catalogo(); }
 </script>
