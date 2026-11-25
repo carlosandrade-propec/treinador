@@ -968,8 +968,21 @@ function grafPeso(d,tend,plano,peso){
 
 st.data=iso(new Date());
 if(!WEB&&TOKEN){var mg=$('migra');mg.href='https://carlosandrade-propec.github.io/treinador/#k='+encodeURIComponent(TOKEN);mg.hidden=false;}   // leva a chave do app antigo para o site
-if(WEB&&!TOKEN){document.body.innerHTML='<div style="font-family:system-ui;padding:32px 24px;max-width:420px;margin:auto"><h2>Treinador</h2><p>Abra pelo link completo (com a chave) uma vez neste aparelho. Depois ele lembra.</p></div>';}
-else { carrega(); catalogo(); }
+function semChave(msg){document.body.innerHTML='<div style="font-family:system-ui;padding:32px 24px;max-width:420px;margin:auto"><h2>Treinador</h2><p>'+(msg?esc(msg):'Para entrar, escreva <b>app</b> no Telegram do Treinador e toque no botão que chegar.')+'</p></div>';}
+(function iniciar(){
+  var mc=WEB&&/[#&]c=([0-9a-f]+)/.exec(location.hash||'');
+  if(mc){   // link de uso único do Telegram: troca pelo token e deixa a chave no link (para o ícone da Tela de Início)
+    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({acao:'trocarCodigo',c:mc[1]})})
+      .then(function(r){return r.json();}).then(function(j){
+        if(!j.ok){if(TOKEN){history.replaceState(null,'',location.pathname+'#k='+encodeURIComponent(TOKEN));carrega();catalogo();}else semChave(j.erro);return;}
+        TOKEN=j.token;lsSet('tk',TOKEN);history.replaceState(null,'',location.pathname+'#k='+encodeURIComponent(TOKEN));carrega();catalogo();
+      }).catch(function(){semChave('Sem conexão. Tente de novo.');});
+    return;
+  }
+  if(WEB&&!TOKEN){semChave();return;}
+  if(WEB&&!/[#&]k=/.test(location.hash||''))history.replaceState(null,'',location.pathname+'#k='+encodeURIComponent(TOKEN));
+  carrega();catalogo();
+})();
 </script>
 </body>
 </html>
