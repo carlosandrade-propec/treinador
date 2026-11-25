@@ -207,12 +207,12 @@ details.mais[open] summary{margin-bottom:10px}
 .sub-h{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .sub-h .ico{width:14px;height:14px}
 
-/* GLP-1 */
-.glp{display:grid;grid-template-columns:auto 1fr;gap:var(--s3);align-items:center}
-.glp-i{width:42px;height:42px;border-radius:13px;background:var(--prot-soft);color:var(--prot);display:grid;place-items:center}
-.glp-i .ico{width:21px;height:21px}
-.glp b{font-weight:700;display:block}
-.glp p{margin:2px 0 0;font-size:.82rem;color:var(--muted)}
+/* aplicação semanal */
+.apl{display:grid;grid-template-columns:auto 1fr;gap:var(--s3);align-items:center}
+.apl-i{width:42px;height:42px;border-radius:13px;background:var(--prot-soft);color:var(--prot);display:grid;place-items:center}
+.apl-i .ico{width:21px;height:21px}
+.apl b{font-weight:700;display:block}
+.apl p{margin:2px 0 0;font-size:.82rem;color:var(--muted)}
 .dica-p{font-size:.82rem;background:var(--prot-soft);border-radius:var(--r-s);padding:10px 12px}
 
 /* comer */
@@ -375,7 +375,7 @@ nav.tab .ico{width:23px;height:23px}
 
     <div class="card" id="c-atv" hidden><div class="eyebrow">Feito hoje · Garmin</div><div id="atv" style="display:flex;flex-direction:column;gap:8px"></div></div>
 
-    <div class="card" id="c-glp1" hidden></div>
+    <div class="card" id="c-apl1" hidden></div>
 
     <div class="card">
       <div class="card-h"><div><div class="eyebrow">Check-in</div><h2 class="card-t">Como você está</h2></div></div>
@@ -605,7 +605,7 @@ function render(){
   renderAvisos(r,s);
   document.querySelectorAll('.teste').forEach(function(x){x.hidden=!(s&&s.teste);});
 
-  renderGlp1(r);
+  renderApl1(r);
 
   // check-in
   var di=r.diario||{};
@@ -637,30 +637,30 @@ function renderAvisos(r,s){
   $('s-avisos').innerHTML=h;
 }
 
-/* GLP-1: quarta = dia de aplicar; 2 dias seguintes = como você está. Nunca fala de dose. */
-function renderGlp1(r){
-  var g=r.glp1, el=$('c-glp1'), h='';
+/* aplicação semanal: quarta = dia de aplicar; 2 dias seguintes = como você está. */
+function renderApl1(r){
+  var g=r.apl1, el=$('c-apl1'), h='';
   if(!g||!(g.diaDeAplicar||g.posDose||g.aplicouHoje)){el.hidden=true;el.innerHTML='';return;}
   if(g.aplicouHoje){
-    h+='<div class="glp"><span class="glp-i">'+ico('cal')+'</span><div><b>Aplicação registrada hoje</b><p>Nos próximos 2 dias eu pergunto como você está.</p></div></div>';
+    h+='<div class="apl"><span class="apl-i">'+ico('cal')+'</span><div><b>Aplicação registrada hoje</b><p>Nos próximos 2 dias eu pergunto como você está.</p></div></div>';
   } else if(g.diaDeAplicar){
-    h+='<div class="glp"><span class="glp-i">'+ico('cal')+'</span><div><b>Aplicação hoje à noite</b><p>Quarta à noite. O Telegram lembra às 21h.</p></div></div>'+
-      '<button class="btn pri block" data-glp="aplicacao">'+ico('ok')+'Apliquei</button>';
+    h+='<div class="apl"><span class="apl-i">'+ico('cal')+'</span><div><b>Aplicação hoje à noite</b><p>Quarta à noite. O Telegram lembra às 21h.</p></div></div>'+
+      '<button class="btn pri block" data-apl="aplicacao">'+ico('ok')+'Apliquei</button>';
   }
   if(g.posDose){
     var on=g.sintomasHoje||[];
-    h+='<div class="glp"><span class="glp-i">'+ico('cal')+'</span><div><b>Como você está?</b><p>'+(g.diasDesde!=null?(g.diasDesde===1?'1 dia':g.diasDesde+' dias')+' depois da aplicação. ':'')+'Toque em tudo o que vale.</p></div></div>'+
+    h+='<div class="apl"><span class="apl-i">'+ico('cal')+'</span><div><b>Como você está?</b><p>'+(g.diasDesde!=null?(g.diasDesde===1?'1 dia':g.diasDesde+' dias')+' depois da aplicação. ':'')+'Toque em tudo o que vale.</p></div></div>'+
       '<div class="chip-wrap" role="group" aria-label="Sintomas de hoje">'+SINT.map(function(x){var p=on.indexOf(x[0])>=0;return '<button type="button" class="chip" data-sint="'+x[0]+'" aria-pressed="'+p+'">'+(p?ico('ok'):'')+'<span class="ct">'+x[1]+'</span></button>';}).join('')+'</div>'+
       '<div class="dica-p">Dia pós-aplicação: proteína primeiro (whey, iogurte, ovos).</div>';
   }
   el.innerHTML=h;el.hidden=false;
 }
-$('c-glp1').addEventListener('click',function(ev){
-  var b=ev.target.closest('[data-glp],[data-sint]');if(!b||b.disabled)return;
+$('c-apl1').addEventListener('click',function(ev){
+  var b=ev.target.closest('[data-apl],[data-sint]');if(!b||b.disabled)return;
   if(b.dataset.sint&&b.getAttribute('aria-pressed')==='true')return toast('Já anotado hoje');
   b.disabled=true;
-  var ev2=b.dataset.glp?'aplicacao':'sintoma', det=b.dataset.sint||'';
-  run('api_glp1',st.dia.data,ev2,det).then(function(r){st.dia=r;render();toast(ev2==='aplicacao'?'Aplicação registrada':'Anotado');}).catch(function(e){b.disabled=false;falha(e);});
+  var ev2=b.dataset.apl?'aplicacao':'sintoma', det=b.dataset.sint||'';
+  run('api_apl1',st.dia.data,ev2,det).then(function(r){st.dia=r;render();toast(ev2==='aplicacao'?'Aplicação registrada':'Anotado');}).catch(function(e){b.disabled=false;falha(e);});
 });
 
 function capturaCargas(){
@@ -845,7 +845,7 @@ document.querySelectorAll('nav.tab button').forEach(function(b){b.addEventListen
 });});
 
 /* SEMANA */
-function temAplicacao(x){return (x.glp1||[]).some(function(e){return (e&&typeof e==='object'?e.evento:e)==='aplicacao';});}
+function temAplicacao(x){return (x.apl1||[]).some(function(e){return (e&&typeof e==='object'?e.evento:e)==='aplicacao';});}
 function semana(){
   run('api_semana',st.data).then(function(r){
     var d=r.dias;
