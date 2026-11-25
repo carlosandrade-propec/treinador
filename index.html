@@ -231,6 +231,9 @@ details.mais[open] summary{margin-bottom:10px}
 .ag-bt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .ag-bt .btn{min-height:52px;flex-direction:column;gap:0;padding:8px 6px;color:var(--agua);border-color:var(--agua-soft);background:var(--agua-soft);font-size:1rem}
 .ag-bt .btn small{font-size:.68rem;font-weight:600;color:var(--muted)}
+.ag-out{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}
+.ag-out .inp{min-height:48px}
+.ag-out .btn{color:var(--agua);background:var(--agua-soft);border-color:var(--agua-soft)}
 .ag-des{background:none;border:0;color:var(--muted);font-size:.8rem;font-weight:600;padding:10px 0 0;text-decoration:underline}
 .migra{display:flex;align-items:center;gap:var(--s3);text-decoration:none;color:var(--accent-ink);background:var(--accent);border:0}
 .migra b{display:block;font-size:.95rem}
@@ -694,12 +697,16 @@ function renderAgua(r){
     '<div class="ag-bar" role="progressbar" aria-valuemin="0" aria-valuemax="'+a.meta+'" aria-valuenow="'+a.ml+'"><i style="width:'+pct+'%"></i>'+(hoje&&esp>0&&esp<100?'<b style="left:'+esp+'%" title="ritmo esperado"></b>':'')+'</div>'+
     '<p class="ag-st '+st2[0]+'">'+esc(st2[1])+'</p>'+
     '<div class="ag-bt"><button class="btn" data-ml="250">+250<small>copo</small></button><button class="btn" data-ml="500">+500<small>garrafa</small></button><button class="btn" data-ml="750">+750<small>ml</small></button></div>'+
+    '<div class="ag-out"><input class="inp" id="ag-ml" type="text" inputmode="numeric" placeholder="Outro valor (ml)" aria-label="Outro valor em ml"><button class="btn" data-ml="outro">Somar</button></div>'+
     (a.registros?'<button class="ag-des" data-ml="0">Desfazer o último ('+litros(a.ultimo.ml)+' às '+esc(a.ultimo.hora)+')</button>':'');
   el.hidden=false;
 }
+$('c-agua').addEventListener('keydown',function(ev){if(ev.target.id==='ag-ml'&&ev.key==='Enter'){ev.preventDefault();var b=$('c-agua').querySelector('[data-ml="outro"]');if(b)b.click();}});
 $('c-agua').addEventListener('click',function(ev){
   var b=ev.target.closest('[data-ml]');if(!b||b.disabled||st.aguaBusy)return;
-  var ml=+b.dataset.ml;st.aguaBusy=true;b.disabled=true;
+  var ml=b.dataset.ml==='outro'?Math.round(+String($('ag-ml').value||'').replace(/[^0-9,.]/g,'').replace(',','.')):+b.dataset.ml;
+  if(b.dataset.ml==='outro'&&!(ml>=10&&ml<=3000)){toast('Digite um valor entre 10 e 3000 ml');$('ag-ml').focus();return;}
+  st.aguaBusy=true;b.disabled=true;
   if(ml>0&&st.dia&&st.dia.agua){var a=st.dia.agua;a.ml+=ml;a.falta=Math.max(0,a.meta-a.ml);a.atraso=Math.max(0,a.esperado-a.ml);a.registros++;a.ultimo={ml:ml,hora:('0'+new Date().getHours()).slice(-2)+':'+('0'+new Date().getMinutes()).slice(-2)};renderAgua(st.dia);}   // resposta imediata
   run('api_agua',st.dia.data,ml).then(function(r){st.dia=r;render();toast(ml>0?'+'+litros(ml)+' de água':'Água desfeita');})
     .catch(function(e){falha(e);carrega();}).then(function(){st.aguaBusy=false;});
