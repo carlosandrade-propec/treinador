@@ -25,6 +25,7 @@
   --accent:#2952e3; --accent-2:#5b7cf5; --accent-ink:#ffffff; --accent-soft:#e7ecfd;
   --ok:#0f7a41; --ok-soft:#ddf3e6; --warn:#955700; --warn-soft:#fdf0d8; --bad:#bd2e1b; --bad-soft:#fde4df;
   --prot:#6a33c6; --prot-soft:#efe6fc;
+  --agua:#0a6fb0; --agua-soft:#e0f0fb;
   --f-d:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --f-b:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:24px;
@@ -42,6 +43,7 @@
   --accent:#7895ff; --accent-2:#a3b6ff; --accent-ink:#06080c; --accent-soft:#1a2446;
   --ok:#41d282; --ok-soft:#0f2a1c; --warn:#f3b44d; --warn-soft:#2e230f; --bad:#ff806c; --bad-soft:#35160f;
   --prot:#b896ff; --prot-soft:#241a3e;
+  --agua:#5cc0ff; --agua-soft:#0f2638;
   --sh-1:0 1px 0 rgba(0,0,0,.4);
   --sh-2:0 1px 0 rgba(0,0,0,.35),0 16px 40px -20px rgba(0,0,0,.85);
   --sh-3:0 20px 60px -20px rgba(0,0,0,.9);
@@ -215,6 +217,21 @@ details.mais[open] summary{margin-bottom:10px}
 .apl-i .ico{width:21px;height:21px}
 .apl b{font-weight:700;display:block}
 .apl p{margin:2px 0 0;font-size:.82rem;color:var(--muted)}
+/* água */
+.ag-top{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s3);margin-top:6px}
+.ag-n{font-family:var(--f-d);font-weight:700;font-size:2.4rem;line-height:1;color:var(--agua)}
+.ag-n small{font-size:1rem;color:var(--muted);font-weight:600;margin-left:4px}
+.ag-pct{font-family:var(--f-d);font-weight:600;font-size:1rem;color:var(--muted)}
+.ag-bar{position:relative;height:12px;border-radius:99px;background:var(--agua-soft);margin:12px 0 8px;overflow:hidden}
+.ag-bar i{position:absolute;inset:0 auto 0 0;border-radius:99px;background:var(--agua);transition:width .5s var(--ease)}
+.ag-bar b{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--fg);opacity:.35}
+.ag-st{font-size:.84rem;color:var(--muted);margin:0 0 12px}
+.ag-st.atr{color:var(--warn);font-weight:600}
+.ag-st.ok{color:var(--ok);font-weight:600}
+.ag-bt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ag-bt .btn{min-height:52px;flex-direction:column;gap:0;padding:8px 6px;color:var(--agua);border-color:var(--agua-soft);background:var(--agua-soft);font-size:1rem}
+.ag-bt .btn small{font-size:.68rem;font-weight:600;color:var(--muted)}
+.ag-des{background:none;border:0;color:var(--muted);font-size:.8rem;font-weight:600;padding:10px 0 0;text-decoration:underline}
 .dica-p{font-size:.82rem;background:var(--prot-soft);border-radius:var(--r-s);padding:10px 12px}
 
 /* comer */
@@ -376,6 +393,8 @@ nav.tab .ico{width:23px;height:23px}
     </div>
 
     <div class="card" id="c-atv" hidden><div class="eyebrow">Feito hoje · Garmin</div><div id="atv" style="display:flex;flex-direction:column;gap:8px"></div></div>
+
+    <div class="card" id="c-agua" hidden></div>
 
     <div class="card" id="c-apl1" hidden></div>
 
@@ -607,6 +626,7 @@ function render(){
   renderAvisos(r,s);
   document.querySelectorAll('.teste').forEach(function(x){x.hidden=!(s&&s.teste);});
 
+  renderAgua(r);
   renderApl1(r);
 
   // check-in
@@ -657,6 +677,28 @@ function renderApl1(r){
   }
   el.innerHTML=h;el.hidden=false;
 }
+/* Água: meta do dia, ritmo esperado para a hora (7h–21h), registro por copo/garrafa. */
+function litros(ml){ml=Math.round(+ml||0);return ml<1000?ml+' ml':num(Math.round(ml/100)/10,1).replace(/,0$/,'')+' L';}
+function renderAgua(r){
+  var a=r.agua, el=$('c-agua');
+  if(!a){el.hidden=true;return;}
+  var pct=Math.min(100,Math.round(a.ml/a.meta*100)), esp=Math.min(100,Math.round(a.esperado/a.meta*100)), hoje=iso(new Date())===r.data;
+  var st2=a.ml>=a.meta?['ok','Meta de água batida.']:(hoje&&a.atraso>=250?['atr','Atrás do ritmo: a esta hora o ideal seria '+litros(a.esperado)+'. Beba '+litros(Math.min(a.atraso,500))+' agora.']:['',hoje?'No ritmo. Faltam '+litros(a.falta)+' até a noite.':'Faltaram '+litros(a.falta)+'.']);
+  el.innerHTML='<div class="card-h"><div><div class="eyebrow">Água</div></div><span class="ag-pct">'+pct+'%</span></div>'+
+    '<div class="ag-top"><div class="ag-n">'+litros(a.ml)+'<small>de '+litros(a.meta)+'</small></div></div>'+
+    '<div class="ag-bar" role="progressbar" aria-valuemin="0" aria-valuemax="'+a.meta+'" aria-valuenow="'+a.ml+'"><i style="width:'+pct+'%"></i>'+(hoje&&esp>0&&esp<100?'<b style="left:'+esp+'%" title="ritmo esperado"></b>':'')+'</div>'+
+    '<p class="ag-st '+st2[0]+'">'+esc(st2[1])+'</p>'+
+    '<div class="ag-bt"><button class="btn" data-ml="250">+250<small>copo</small></button><button class="btn" data-ml="500">+500<small>garrafa</small></button><button class="btn" data-ml="750">+750<small>ml</small></button></div>'+
+    (a.registros?'<button class="ag-des" data-ml="0">Desfazer o último ('+litros(a.ultimo.ml)+' às '+esc(a.ultimo.hora)+')</button>':'');
+  el.hidden=false;
+}
+$('c-agua').addEventListener('click',function(ev){
+  var b=ev.target.closest('[data-ml]');if(!b||b.disabled||st.aguaBusy)return;
+  var ml=+b.dataset.ml;st.aguaBusy=true;b.disabled=true;
+  if(ml>0&&st.dia&&st.dia.agua){var a=st.dia.agua;a.ml+=ml;a.falta=Math.max(0,a.meta-a.ml);a.atraso=Math.max(0,a.esperado-a.ml);a.registros++;a.ultimo={ml:ml,hora:('0'+new Date().getHours()).slice(-2)+':'+('0'+new Date().getMinutes()).slice(-2)};renderAgua(st.dia);}   // resposta imediata
+  run('api_agua',st.dia.data,ml).then(function(r){st.dia=r;render();toast(ml>0?'+'+litros(ml)+' de água':'Água desfeita');})
+    .catch(function(e){falha(e);carrega();}).then(function(){st.aguaBusy=false;});
+});
 $('c-apl1').addEventListener('click',function(ev){
   var b=ev.target.closest('[data-apl],[data-sint]');if(!b||b.disabled)return;
   if(b.dataset.sint&&b.getAttribute('aria-pressed')==='true')return toast('Já anotado hoje');
